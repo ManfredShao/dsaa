@@ -4,41 +4,36 @@
 
 using namespace std;
 
-long long total_swaps;
-
-int partition(vector<int> &a, int p, int r) {
+long long countSwapsInPartition(vector<int>& a, int p, int r, int& partition_point) {
     int pivot_val = a[(p + r) / 2];
     int i = p - 1;
     int j = r + 1;
+    long long swaps = 0;
     
     while (true) {
-        // Move i to the right while a[i] < pivot
-        do {
-            i++;
-        } while (a[i] < pivot_val);
+        do { i++; } while (a[i] < pivot_val);
+        do { j--; } while (a[j] > pivot_val);
         
-        // Move j to the left while a[j] > pivot
-        do {
-            j--;
-        } while (a[j] > pivot_val);
-        
-        // If pointers crossed, return partition point
         if (i >= j) {
-            return j;
+            partition_point = j;
+            return swaps;
         }
         
-        // Swap elements and count the swap
         swap(a[i], a[j]);
-        total_swaps++;
+        swaps++;
     }
 }
 
-void quickSort(vector<int> &a, int p, int r) {
-    if (p < r) {
-        int q = partition(a, p, r);
-        quickSort(a, p, q);
-        quickSort(a, q + 1, r);
-    }
+long long quickSortCount(vector<int>& a, int p, int r) {
+    if (p >= r) return 0;
+    
+    int q;
+    long long swaps = countSwapsInPartition(a, p, r, q);
+    
+    swaps += quickSortCount(a, p, q);
+    swaps += quickSortCount(a, q + 1, r);
+    
+    return swaps;
 }
 
 int main() {
@@ -55,11 +50,11 @@ int main() {
             cin >> a[i];
         }
 
-        total_swaps = 0;
+        long long result = 0;
         if (n > 0) {
-            quickSort(a, 0, n - 1);
+            result = quickSortCount(a, 0, n - 1);
         }
-        cout << total_swaps << endl;
+        cout << result << endl;
     }
     return 0;
 }
